@@ -1,0 +1,130 @@
+:root {
+  font-family: system-ui, -apple-system, sans-serif;
+  color: #1a1a1a;
+  background: #f7f7f8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.app {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+
+.app__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.app__header h1 {
+  font-size: 22px;
+  margin: 0;
+}
+
+.app__hint {
+  font-size: 12px;
+  color: #888;
+}
+
+.interests {
+  background: #eef2ff;
+  border: 1px solid #d7defb;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.interests__label {
+  font-weight: 600;
+  margin-right: 6px;
+}
+
+.interests__value {
+  color: #555;
+}
+
+.app__state {
+  color: #666;
+}
+
+.app__state--error {
+  color: #c0392b;
+}
+
+.feed {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #e5e5e8;
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.card__title {
+  font-weight: 600;
+  color: #1a1a1a;
+  text-decoration: none;
+}
+
+.card__title:hover {
+  text-decoration: underline;
+}
+
+.card__meta {
+  font-size: 12px;
+  color: #999;
+  margin: 4px 0;
+}
+
+.card__summary {
+  font-size: 14px;
+  color: #333;
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  background: #f4f6f8;
+  border-radius: 6px;
+}
+
+.card__summary-label {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6b7280;
+  margin-right: 8px;
+}
+
+.card__full {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #444;
+}
+
+.card__full > summary {
+  cursor: pointer;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.card__full p {
+  margin: 8px 0 0;
+  line-height: 1.5;
+}

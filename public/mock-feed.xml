@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Vibe Feed — Local Mock</title>
+    <link>http://localhost:5173/</link>
+    <description>Local mock feed. Served by the dev server itself, no network and no CORS — so the feed works out of the box on any machine. Items carry full text in content:encoded.</description>
+
+    <item>
+      <title>WebGPU reaches Baseline across major browsers</title>
+      <link>https://example.com/webgpu-baseline</link>
+      <description>The WebGPU API is now broadly available, letting web apps run GPU compute directly in the browser.</description>
+      <content:encoded><![CDATA[<p>The WebGPU API has reached Baseline status, meaning it now works across all major browsers without flags. This is a turning point for client-side computation on the web.</p><p>Until now, anything GPU-heavy in the browser meant WebGL shaders or shipping work to a server. WebGPU exposes modern compute pipelines directly, which unlocks a class of applications that were previously impractical: in-browser image processing, physics, and — notably — running small language models entirely on the user's device.</p><p>For a model to run in a tab it has to be small (sub-2B parameters is the comfortable range today) and quantized, and the weights still have to be downloaded and cached. But the inference itself, once loaded, happens locally with no data leaving the device. That privacy property is the main reason teams are experimenting with it for sensitive content.</p><p>The catch is availability: not every machine has a capable GPU, and Safari's support lags. Any serious app needs a graceful fallback for when WebGPU is absent.</p>]]></content:encoded>
+      <pubDate>Mon, 16 Jun 2026 09:00:00 GMT</pubDate>
+    </item>
+
+    <item>
+      <title>Show HN: I built a news reader that runs entirely client-side</title>
+      <link>https://example.com/show-hn-client-side-reader</link>
+      <description>No backend at all. Feeds are fetched in the browser, ranking and summaries run on-device.</description>
+      <content:encoded><![CDATA[<p>I wanted a news reader with no server to run and no data collection, so I built one that lives entirely in the browser. Feeds are fetched client-side, ranking happens locally, and summaries are generated on-device.</p><p>The first wall I hit was CORS: most RSS endpoints don't send permissive headers, so a direct fetch fails. The common workaround is a public CORS proxy, but that's a single point of failure and a man-in-the-middle over your content. I ended up curating sources that do send CORS headers and treating the proxy as a last resort.</p><p>The second surprise was how good small models are at summarizing short articles. I expected to need a server-side model; in practice a quantized sub-2B model in the browser was good enough for one-paragraph digests.</p><p>Ranking turned out to be the hardest part — not technically, but as a product question. "Most recent" is easy and almost always wrong. Figuring out what "relevant" means for a given reader is the whole game.</p>]]></content:encoded>
+      <pubDate>Mon, 16 Jun 2026 08:30:00 GMT</pubDate>
+    </item>
+
+    <item>
+      <title>The hidden cost of CORS proxies in production</title>
+      <link>https://example.com/cors-proxy-cost</link>
+      <description>Public CORS proxies are a convenient hack, but they carry real risks.</description>
+      <content:encoded><![CDATA[<p>Public CORS proxies feel like free infrastructure: point your fetch at them and cross-origin requests just work. But in production they quietly become a liability.</p><p>First, they're a single point of failure. When the proxy is rate-limited or down, every request that depends on it fails — and you've handed your uptime to a service you don't control. Second, they're a man-in-the-middle: every byte of content passes through someone else's server, which can read, log, or alter it. For anything sensitive that's unacceptable.</p><p>The honest fix is to run your own proxy or fetch server-side, where you control caching, rate limits, and trust. In a strictly client-only app you don't have that option, so the pragmatic move is to prefer sources that send CORS headers and to treat any proxy as a labeled, temporary hack rather than a foundation.</p>]]></content:encoded>
+      <pubDate>Mon, 16 Jun 2026 07:45:00 GMT</pubDate>
+    </item>
+
+    <item>
+      <title>Small language models are good enough for summarization</title>
+      <link>https://example.com/small-llm-summarization</link>
+      <description>Benchmarks suggest sub-2B models handle short-text summarization surprisingly well.</description>
+      <content:encoded><![CDATA[<p>There's a persistent assumption that summarization needs a large model. For short-form content — news items, blog posts, release notes — that assumption is increasingly wrong.</p><p>Recent evaluations show models under two billion parameters producing summaries that readers rate as comparable to much larger models, as long as the input is short and the task is constrained. The quality gap that does exist tends to appear on long documents, reasoning, and nuance — not on "give me one sentence about this article."</p><p>This matters enormously for client-side apps, because model size dictates whether it can run in a browser tab at all. A sub-2B quantized model fits; a 70B model does not. Picking the smallest model that clears your quality bar is the difference between a feature that works on a user's laptop and one that only works on your demo machine.</p>]]></content:encoded>
+      <pubDate>Mon, 16 Jun 2026 06:10:00 GMT</pubDate>
+    </item>
+
+    <item>
+      <title>Show HN: I built a news reader that runs entirely client-side</title>
+      <link>https://example.com/show-hn-client-side-reader-dup</link>
+      <description>Cross-posted duplicate of the same story from a different source — useful for testing dedup.</description>
+      <content:encoded><![CDATA[<p>This is a cross-posted duplicate of the same "client-side news reader" story, syndicated from a different source. It exists so you can see what duplicate detection has to deal with: same story, different link, slightly different wording.</p><p>A naive feed shows both. A good one notices they're the same and collapses them.</p>]]></content:encoded>
+      <pubDate>Mon, 16 Jun 2026 05:55:00 GMT</pubDate>
+    </item>
+
+    <item>
+      <title>RSS is quietly having a comeback</title>
+      <link>https://example.com/rss-comeback</link>
+      <description>As algorithmic feeds fatigue users, plain chronological RSS readers see renewed interest.</description>
+      <content:encoded><![CDATA[<p>After a decade of algorithmic timelines, a quiet counter-movement is underway: people are returning to RSS. The appeal is control — you choose the sources, and nothing is injected or reordered by an opaque ranking system.</p><p>But pure chronological RSS has its own failure mode. Subscribe to a dozen active sources and the feed becomes a firehose, dominated by whichever source posts most often. The signal you actually care about drowns in volume.</p><p>The interesting middle ground is reader-controlled ranking: keep the transparency and ownership of RSS, but let the user express what they want to see and reorder accordingly — on their own device, without surrendering their data to a recommendation engine in the cloud.</p>]]></content:encoded>
+      <pubDate>Sun, 15 Jun 2026 20:00:00 GMT</pubDate>
+    </item>
+
+    <item>
+      <title>IndexedDB caching patterns for offline-first web apps</title>
+      <link>https://example.com/indexeddb-caching</link>
+      <description>How to cache fetched content and model weights locally so a return visit is instant.</description>
+      <content:encoded><![CDATA[<p>For an app that fetches feeds and downloads model weights, caching isn't an optimization — it's what makes the second visit usable. IndexedDB is the workhorse here: it can store structured data and large blobs, survives reloads, and works offline.</p><p>The patterns that matter: store fetched articles keyed by a stable id so you can render instantly while revalidating in the background; cache model weights once and reuse them across sessions (a multi-hundred-megabyte download you do not want to repeat); and — the part everyone underestimates — have an invalidation strategy. Stale content with no expiry is its own bug.</p><p>The Cache API and IndexedDB complement each other: the former for opaque network responses, the latter for queryable app state.</p>]]></content:encoded>
+      <pubDate>Sun, 15 Jun 2026 14:20:00 GMT</pubDate>
+    </item>
+
+    <item>
+      <title>A field guide to graceful degradation</title>
+      <link>https://example.com/graceful-degradation</link>
+      <description>When a data source or a GPU feature is unavailable, the app should stay useful.</description>
+      <content:encoded><![CDATA[<p>Graceful degradation is the discipline of staying useful when something you depend on isn't there. A feed source 500s; WebGPU is missing; a proxy is rate-limited. The amateur move is to let any of these take down the whole screen. The professional move is to isolate the failure and keep delivering what still works.</p><p>Concretely: if one feed source fails, render the others instead of throwing the whole load away. If the on-device model can't load, fall back to a cheaper summary — even just the first paragraph — and tell the user what mode they're in. If the network is gone, serve whatever is cached.</p><p>The mindset shift is to treat external resources — feeds, proxies, GPUs, models — as unreliable by default, and to design the fallback as a first-class path rather than a panicked catch block.</p>]]></content:encoded>
+      <pubDate>Sun, 15 Jun 2026 11:05:00 GMT</pubDate>
+    </item>
+
+  </channel>
+</rss>
