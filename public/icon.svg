@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Vibe Feed">
+  <rect width="512" height="512" rx="96" fill="#E8DCC8"/>
+  <!-- feed cards -->
+  <g fill="#FFFFFF" stroke="#2B2B2B" stroke-opacity="0.08">
+    <rect x="120" y="120" width="272" height="80" rx="16"/>
+    <rect x="120" y="216" width="272" height="80" rx="16"/>
+    <rect x="120" y="312" width="272" height="80" rx="16"/>
+  </g>
+  <!-- accent bars (terracotta) = ranked/relevant -->
+  <g fill="#B5552E">
+    <rect x="144" y="148" width="120" height="16" rx="8"/>
+    <rect x="144" y="244" width="80" height="16" rx="8"/>
+    <rect x="144" y="340" width="100" height="16" rx="8"/>
+  </g>
+  <g fill="#2B2B2B" fill-opacity="0.18">
+    <rect x="144" y="172" width="200" height="10" rx="5"/>
+    <rect x="144" y="268" width="200" height="10" rx="5"/>
+    <rect x="144" y="364" width="200" height="10" rx="5"/>
+  </g>
+</svg>

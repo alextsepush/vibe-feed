@@ -1,5 +1,7 @@
 # Vibe Feed
 
+[![CI](https://github.com/unimatch-hiring/vibe-feed/actions/workflows/ci.yml/badge.svg)](https://github.com/unimatch-hiring/vibe-feed/actions/workflows/ci.yml)
+
 ## About
 
 A tiny **client-side** news/recommendation feed. RSS sources are fetched in the
@@ -32,6 +34,16 @@ dev server, works offline) plus two CORS-friendly network sources. If the
 network sources are down, the local mock alone keeps the feed alive.
 
 Stack: Vite + React + TypeScript.
+
+## Tests
+
+```bash
+npm test
+```
+
+A small set of **unit tests** (Vitest) covering the pure helpers — the mock
+summarizer and the `personalize` stub. They're a smoke check, not full coverage;
+extend them as you build. CI runs build + tests on every push.
 
 ## Files
 
