@@ -14,7 +14,17 @@ export interface UserInterests {
 
 export const EMPTY_INTERESTS: UserInterests = { topics: [] };
 
-// Stub: ignores interests, returns items as-is.
+/**
+ * Returns the feed as-is. This is a stub — your job is to make it personalize.
+ *
+ * Going further (optional): a hardcoded sort is one way. Another is to treat this
+ * as an *agent* — hand it tools (e.g. scoreItem, rerank) and let it decide how to
+ * order the feed for the reader's interests. Any TS agent SDK works — the Vercel
+ * AI SDK (https://ai-sdk.dev), the OpenAI Agents SDK, or the Claude Agent SDK all
+ * run in the browser; pick whichever you like. Gemini has a free tier
+ * (https://aistudio.google.com). There's no single right answer — we care how you
+ * reason about it.
+ */
 export function personalize(
   items: FeedItem[],
   interests: UserInterests
