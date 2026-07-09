@@ -12,7 +12,7 @@ import { toPlainText, truncate } from "./text";
 
 // Free-tier-eligible, fast Gemini model. Pinned here so it's a one-line
 // change if Google's naming shifts.
-const GEMINI_RANK_MODEL = "gemini-2.5-flash";
+const GEMINI_RANK_MODEL = "gemini-2.5-flash-lite";
 
 const MAX_SNIPPET_CHARS = 400;
 const MAX_ITEMS = 40;
@@ -68,7 +68,7 @@ Prefer items that match the interests; use title and snippet to judge relevance.
 Return every provided item id exactly once, best match first. Keep reasons short (under 15 words).`,
     prompt: JSON.stringify({ topics, items: compact }),
     abortSignal: signal,
-    timeout: 15_000,
+    timeout: 100_000,
   });
 
   return { order: output?.ranking ?? [] };
