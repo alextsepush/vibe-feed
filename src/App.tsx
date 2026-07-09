@@ -1,17 +1,22 @@
-import { useEffect, useMemo, useState, type KeyboardEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { fetchAllFeeds } from "./lib/rss";
-import { personalize, EMPTY_INTERESTS, type UserInterests } from "./lib/personalize";
+import {
+  personalize,
+  chronological,
+  EMPTY_INTERESTS,
+  type UserInterests,
+  type PersonalizeMode,
+  type RankMeta,
+} from "./lib/personalize";
 import { mockSummarizer, isWebGPUAvailable, getMemoryInfo, type Summarizer } from "./lib/summarizer";
+import { readApiKey, writeApiKey, clearApiKey, maskApiKey } from "./lib/apiKey";
+import { toPlainText } from "./lib/text";
 import type { FeedItem } from "./lib/types";
 
 // Minimal UI. Each card shows title + full text + an LLM summary (mockSummarizer
-// by default). Interests are free-form tags (persisted); personalize() currently
-// ignores them and the feed is shown unchanged.
-
-// Strip HTML to plain text for display/summarization.
-function toPlainText(html: string): string {
-  return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
-}
+// by default). Interests are free-form tags (persisted). personalize() reorders
+// the feed: chronological cold start, keyword heuristic, or (with a Gemini API
+// key) a single LLM rerank — see src/lib/personalize.ts.
 
 const INTERESTS_KEY = "vibe-feed:interests";
 
@@ -42,7 +47,29 @@ function writeInterests(interests: UserInterests): void {
   }
 }
 
-function Card({ item, summarizer }: { item: FeedItem; summarizer: Summarizer }) {
+function itemsKeyOf(list: FeedItem[]): string {
+  return list.map((i) => i.id).join("\0");
+}
+
+function modeHint(mode: PersonalizeMode, hasKey: boolean): string | null {
+  if (mode === "heuristic" && !hasKey) {
+    return "Ranked by keyword match (add a Gemini API key for LLM ranking)";
+  }
+  if (mode === "llm") {
+    return "Ranked by Gemini";
+  }
+  return null;
+}
+
+function Card({
+  item,
+  meta,
+  summarizer,
+}: {
+  item: FeedItem;
+  meta?: RankMeta;
+  summarizer: Summarizer;
+}) {
   const fullText = useMemo(() => toPlainText(item.content), [item.content]);
   const [summary, setSummary] = useState<string>("…");
 
@@ -67,6 +94,8 @@ function Card({ item, summarizer }: { item: FeedItem; summarizer: Summarizer }) 
         <span className="card__summary-label">Summary</span>
         {summary}
       </div>
+
+      {meta?.reason && <div className="card__reason">Why: {meta.reason}</div>}
 
       <details className="card__full">
         <summary>Full text</summary>
@@ -150,6 +179,74 @@ function InterestsEditor({
   );
 }
 
+/** Collapsible Gemini API key entry. Key lives only in localStorage. */
+function ApiKeySettings({
+  apiKey,
+  onChange,
+}: {
+  apiKey: string;
+  onChange: (next: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState("");
+
+  function save() {
+    const saved = writeApiKey(draft);
+    onChange(saved ? draft.trim() : "");
+    setDraft("");
+  }
+
+  function clear() {
+    clearApiKey();
+    onChange("");
+    setDraft("");
+  }
+
+  return (
+    <section className="api-key">
+      <button
+        type="button"
+        className="api-key__toggle"
+        onClick={() => setOpen((v) => !v)}
+      >
+        {apiKey ? `Gemini key: ${maskApiKey(apiKey)}` : "Add Gemini API key (optional)"}
+      </button>
+      {open && (
+        <div className="api-key__panel">
+          <p className="api-key__hint">
+            Stored only in this browser. Any script on this origin (including
+            XSS) can read it. Create a key at{" "}
+            <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer">
+              Google AI Studio
+            </a>
+            , restrict it to the Generative Language API (and HTTP referrer,
+            when available), and treat it as a free-tier demo key — not a
+            production secret.
+          </p>
+          <div className="api-key__row">
+            <input
+              className="api-key__input"
+              type="password"
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              placeholder="Paste Gemini API key…"
+              aria-label="Gemini API key"
+            />
+            <button type="button" onClick={save} disabled={!draft.trim()}>
+              Save
+            </button>
+            {apiKey && (
+              <button type="button" onClick={clear}>
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
 export function App() {
   const [items, setItems] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -157,6 +254,16 @@ export function App() {
 
   // Interest model, restored from localStorage and written back on change.
   const [interests, setInterests] = useState<UserInterests>(readInterests);
+  const [apiKey, setApiKey] = useState<string>(readApiKey);
+
+  const [feed, setFeed] = useState<FeedItem[]>([]);
+  const [rankMeta, setRankMeta] = useState<Map<string, RankMeta>>(new Map());
+  const [rankingStatus, setRankingStatus] = useState<"idle" | "ranking" | "error">("idle");
+  const [rankingMessage, setRankingMessage] = useState<string | null>(null);
+
+  const prevItemsKeyRef = useRef<string>("");
+  const prevInterestsKeyRef = useRef<string>("");
+  const prevApiKeyRef = useRef<string>("");
 
   useEffect(() => {
     writeInterests(interests);
@@ -169,8 +276,62 @@ export function App() {
       .finally(() => setLoading(false));
   }, []);
 
-  // personalize() is a stub — returns items unchanged for now.
-  const feed = useMemo(() => personalize(items, interests), [items, interests]);
+  // Async, cancellable ranking: chrono paint immediately when the item set
+  // changes, keep the previous ranked order (SWR) while only interests/key
+  // change, and never blank the feed while items are loaded.
+  useEffect(() => {
+    if (items.length === 0) {
+      setFeed([]);
+      setRankMeta(new Map());
+      setRankingStatus("idle");
+      prevItemsKeyRef.current = "";
+      return;
+    }
+
+    const itemsKey = itemsKeyOf(items);
+    const interestsKey = JSON.stringify(interests.topics);
+    const itemsChanged = itemsKey !== prevItemsKeyRef.current;
+    const interestsChanged = interestsKey !== prevInterestsKeyRef.current;
+    const apiKeyChanged = apiKey !== prevApiKeyRef.current;
+
+    if (itemsChanged) {
+      setFeed(chronological(items));
+      setRankMeta(new Map());
+    }
+
+    prevItemsKeyRef.current = itemsKey;
+    prevInterestsKeyRef.current = interestsKey;
+    prevApiKeyRef.current = apiKey;
+
+    setRankingStatus("ranking");
+
+    const ac = new AbortController();
+    const delayMs = itemsChanged ? 0 : interestsChanged || apiKeyChanged ? 300 : 0;
+
+    const handle = window.setTimeout(async () => {
+      try {
+        const result = await personalize(items, interests, {
+          apiKey: apiKey || undefined,
+          signal: ac.signal,
+        });
+        if (ac.signal.aborted) return;
+        setFeed(result.items);
+        setRankMeta(result.metaById);
+        setRankingStatus("idle");
+        setRankingMessage(result.warning ?? modeHint(result.mode, Boolean(apiKey)));
+      } catch (e) {
+        if (ac.signal.aborted) return;
+        setFeed(chronological(items));
+        setRankingStatus("error");
+        setRankingMessage(String(e));
+      }
+    }, delayMs);
+
+    return () => {
+      ac.abort();
+      clearTimeout(handle);
+    };
+  }, [items, interests, apiKey]);
 
   return (
     <main className="app">
@@ -189,13 +350,21 @@ export function App() {
       </header>
 
       <InterestsEditor interests={interests} onChange={setInterests} />
+      <ApiKeySettings apiKey={apiKey} onChange={setApiKey} />
 
       {loading && <p className="app__state">Loading feeds…</p>}
       {error && <p className="app__state app__state--error">{error}</p>}
+      {rankingStatus === "ranking" && <p className="app__state">Ranking…</p>}
+      {rankingMessage && rankingStatus !== "error" && (
+        <p className="app__state app__state--hint">{rankingMessage}</p>
+      )}
+      {rankingStatus === "error" && (
+        <p className="app__state app__state--error">{rankingMessage}</p>
+      )}
 
       <ul className="feed">
         {feed.map((item) => (
-          <Card key={item.id} item={item} summarizer={mockSummarizer} />
+          <Card key={item.id} item={item} meta={rankMeta.get(item.id)} summarizer={mockSummarizer} />
         ))}
       </ul>
     </main>

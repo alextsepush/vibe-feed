@@ -121,6 +121,58 @@ body {
   color: #c0392b;
 }
 
+.app__state--hint {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.api-key {
+  margin-bottom: 16px;
+}
+
+.api-key__toggle {
+  font-size: 13px;
+  color: #3730a3;
+  background: #fff;
+  border: 1px solid #d7defb;
+  border-radius: 999px;
+  padding: 5px 12px;
+  cursor: pointer;
+}
+
+.api-key__toggle:hover {
+  background: #eef2ff;
+}
+
+.api-key__panel {
+  margin-top: 8px;
+  background: #fff;
+  border: 1px solid #e5e5e8;
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.api-key__hint {
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.5;
+  margin: 0 0 10px;
+}
+
+.api-key__row {
+  display: flex;
+  gap: 8px;
+}
+
+.api-key__input {
+  flex: 1;
+  font: inherit;
+  font-size: 13px;
+  padding: 6px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+}
+
 .feed {
   list-style: none;
   padding: 0;
@@ -187,4 +239,11 @@ body {
 .card__full p {
   margin: 8px 0 0;
   line-height: 1.5;
+}
+
+.card__reason {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 6px;
+  font-style: italic;
 }
