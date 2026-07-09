@@ -45,12 +45,72 @@ body {
 }
 
 .interests__label {
+  display: block;
   font-weight: 600;
-  margin-right: 6px;
+  margin-bottom: 8px;
 }
 
-.interests__value {
-  color: #555;
+.interests__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  min-height: 32px;
+}
+
+.interests__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #fff;
+  border: 1px solid #c7d2fe;
+  border-radius: 999px;
+  padding: 3px 6px 3px 10px;
+  font-size: 13px;
+  color: #3730a3;
+}
+
+.interests__tag-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #6366f1;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.interests__tag-remove:hover {
+  background: #e0e7ff;
+  color: #312e81;
+}
+
+.interests__input {
+  flex: 1;
+  min-width: 140px;
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  color: #1a1a1a;
+  outline: none;
+  padding: 4px 2px;
+}
+
+.interests__input::placeholder {
+  color: #9ca3af;
+}
+
+.interests__hint {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: #6b7280;
 }
 
 .app__state {
